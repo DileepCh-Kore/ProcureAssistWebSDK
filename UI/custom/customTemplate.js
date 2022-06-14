@@ -6,6 +6,11 @@
 		this.extension = null;
 	}
 	
+// Custom form variables start here
+	let res_arr = [];
+	let res_arr_commodity = []
+	let counter = 0;
+// Custom form variables end here
 	/**
 	 * purpose: Function to render bot message for a given custom template
 	 * input  : Bot Message
@@ -33,6 +38,20 @@
 				'extension': this.extension
 			});
 		}
+		// Custom form changes start here
+		else if (msgData.message[0] && msgData.message[0].component && msgData.message[0].component.payload && msgData.message[0].component.payload.template_type == "custom_form_template") {
+			messageHtml = $(this.getChatTemplate("customFromTemplate")).tmpl({
+				'msgData': msgData,
+				'helpers': this.helpers,
+				'extension': this.extension
+			});
+			//this.bindEvents(messageHtml);
+			this.customFormTemplateEvents(messageHtml)
+		    if(msgData.message[0].component && msgData.message[0].component.payload && msgData.message[0].component.payload.fromHistory){
+		        $(messageHtml).find(".formMainComponent form").addClass("hide");
+		    }
+		}
+		// Custom form changes end here
 		else if (msgData.message[0] && msgData.message[0].component && msgData.message[0].component.payload && msgData.message[0].component.payload.template_type == "form_template") {
 			messageHtml = $(this.getChatTemplate("formTemplate")).tmpl({
 				'msgData': msgData,
@@ -260,6 +279,97 @@
 			{{/if}} \
 		</script>';
 	
+
+// Custom form template changes starts here
+var customFromTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tmpl"> \
+{{if msgData.message}} \
+<li {{if msgData.type !== "bot_response"}} id="msg_${msgItem.clientMessageId}"{{/if}} class="{{if msgData.type === "bot_response"}}fromOtherUsers{{else}}fromCurrentUser{{/if}} with-icon" onload=test(msgData.message[0].component.payload)> \
+	<div class="buttonTmplContent"> \
+	{{if msgData.createdOn}}<div class="extra-info">${helpers.formatDate(msgData.createdOn)}</div>{{/if}} \
+		{{if msgData.icon}}<div class="profile-photo"> <div class="user-account avtar" style="background-image:url(${msgData.icon})"></div> </div> {{/if}} \
+	   <div class="dummy-test" onload="test(msgData.message[0].component.payload)"> \
+			<p class="submit-message hide"></p>\
+			<div class="formMainComponent" >\
+			  {{if msgData.message[0].component.payload.heading}}<div class="formHeading">${msgData.message[0].component.payload.heading}</div>{{else}}Submit Form{{/if}}\
+			  <div class="extraPadding"> \
+				<div class="label-text">Enter Supplier IFA</div> \
+				<input class="input-box-textArea inputArea" autocomplete="off" value="${msgData.message[0].component.payload.suppVal}" placeholder="Provide Supplier IFA" minlength="10" maxlength="10" id="supplierIFA"></input> \
+				<div class="error-msg hide" id="supplierError">Please enter a valid 10 digit supplier IFA</div> \
+				<div class="error-msg hide" id="supplierEmpty">This field is required</div>\
+			</div> \
+				<div class="parentListDiv1"> \
+				<div class="label-text">Please select your Division </div>\
+						<button class="dropbtn-down-prod-Div" onclick="test()"><span>${msgData.message[0].component.payload.divVal.toUpperCase()}</span> <span class="dropdown-icon"> > </span></button>\
+					<div id="productDropdown1" class="dropdown-content-DIV">\
+						<ul class="multi" > \
+						{{each(key, msgItem) msgData.message[0].component.payload.divisions}} \
+								<li value="${msgItem}" class="dropdown-item">${msgItem}</li>\
+						{{/each}} \
+						</ul> \
+				</div> \
+				<div class="parentListDiv2"> \
+				<div class="label-text">Please select your Business Unit</div>\
+						<button class="dropbtn-down-prod-BU" >${msgData.message[0].component.payload.buVal.toUpperCase()}<span class="dropdown-icon" id="dropdown-icon-BU"> > </span></button>\
+					<div id="productDropdown2" class="dropdown-content-BU" >\
+						<ul class="multi" id="BU-drop"> \
+						{{each(key, msgItem) msgData.message[0].component.payload.div_data}} \
+								<li value="${msgItem[0]}" class="dropdown-item">${msgItem[0]+"/"+msgItem[1]+"/"+msgItem[2]+"/"+msgItem[3]}</li>\
+						{{/each}} \
+						</ul> \
+				</div> \
+				<div class="parentListDiv3"> \
+				<div class="label-text">Please select your region</div>\
+						<button class="dropbtn-down-prod-Region">${msgData.message[0].component.payload.regionVal.toUpperCase()}<span class="dropdown-icon" id="dropdown-icon-Region"> > </span></button>\
+					<div id="productDropdown3" class="dropdown-content-Region">\
+						<ul class="multi" > \
+						{{each(key, msgItem) msgData.message[0].component.payload.Region}} \
+								<li value="${msgItem[1]}" class="dropdown-item">${msgItem[0]}</li>\
+						{{/each}} \
+						</ul> \
+				</div> \
+				<div class="parentListDiv4"> \
+				<div class="label-text">Please select a Category</div>\
+						<button class="dropbtn-down-prod-Category">${msgData.message[0].component.payload.categoryVal.toUpperCase()}<span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span></button>\
+					<div id="productDropdown4" class="dropdown-content-Category">\
+						<ul class="multi" > \
+						{{each(key, msgItem) msgData.message[0].component.payload.category}} \
+								<li value="${msgItem}" class="dropdown-item">${msgItem}</li>\
+						{{/each}} \
+						</ul> \
+				</div> \
+				<div class="parentListDiv5"> \
+				<div class="label-text">Please select a Commodity</div>\
+						<button class="dropbtn-down-prod-Commodity">${msgData.message[0].component.payload.commodityVal.toUpperCase()}<span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span></button>\
+					<div id="productDropdown5" class="dropdown-content-Commodity">\
+						<ul class="multi" id="category-drop"> \
+						{{each(key, msgItem) msgData.message[0].component.payload.commodity_data}} \
+								<li value="${msgItem}" class="dropdown-item">${msgItem[0]+"/"+msgItem[1]+"/"+msgItem[2]+"/"+msgItem[3]}</li>\
+						{{/each}} \
+						</ul> \
+				</div> \
+				<div class="extraPadding"> \
+				<div class="label-text">Enter ESN </div> \
+				<input class="input-box-textArea inputArea" autocomplete="off" value="${msgData.message[0].component.payload.esnVal}" placeholder="Provide ESN" minlength="3" id="ESN"></input> \
+				<div class="error-msg hide" id="esnError">Enter valid ESN</div> \
+				<div class="error-msg hide" id="esnEmpty">Please enter a valid 3 character ESN</div>\
+				<div class="error-msg hide" id="multiple-esn">To enter multiple ESNs please seperate them by commas(,) or semi-colon(;)</div>\
+				</div> \
+				<div class="extraPadding"> \
+				<div class="label-text">Fiscal Year</div> \
+				<input class="input-box-textArea inputArea" autocomplete="off" value="2022" minlength="0" maxlength="5120" disabled></input> \
+				<div class="error-msg no-show">This field is required</div> \
+			</div> \
+			<div class="align-btn-block extraPaddingSubmit"><button class="submit-button-primary-btn" >Submit</button></div>\
+			</div>\
+	   </div>\
+	</div>\
+</li> \
+{{/if}} \
+</script>'
+
+// Custom form changes end here
+
+
 		/* Sample template structure for multi-select checkboxes
 			var message = {
 			"type": "template",
@@ -2610,12 +2720,197 @@ var advancedListTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tm
 		} 
 		else if(tempType === "advancedMultiListTemplate"){
 			return advancedMultiListTemplate;
-		} else {
+		}
+		//custom form template changes start here
+		else if (tempType === "customFromTemplate") {
+			return customFromTemplate
+		}
+		//custom form template changes end here 
+		else {
 			return "";
 		}
 		return "";
 	}; // end of getChatTemplate method
 
+
+	// custom form template changes start here
+	customTemplate.prototype.customFormTemplateEvents = function (messageHtml) {
+		chatInitialize = this.chatInitialize;
+		$(messageHtml).find('.formMainComponent .parentListDiv1 ').off('click', '.dropbtn-down-prod-Div').on('click', '.dropbtn-down-prod-Div', function (e) {
+			$(e.currentTarget).closest('.parentListDiv1').find('.dropdown-content-DIV').toggle("show")
+
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv2 ').off('click', '.dropbtn-down-prod-BU').on('click', '.dropbtn-down-prod-BU', function (e) {
+			$(e.currentTarget).closest('.parentListDiv2').find('.dropdown-content-BU').toggle("show")
+			if ($(messageHtml).find(".dropbtn-down-prod-Div ").text().includes("Select Division")) {
+				$(messageHtml).find('#BU-drop').html('<li class="dropdown-item">Please select Division</li>');
+			}
+			if (!$(messageHtml).find(".dropbtn-down-prod-Div ").text().includes("Select Division")) {
+				console.log(res_arr)
+				let temp_arr = []
+				let t = $(messageHtml).find(".dropbtn-down-prod-Div ").text().split(">")
+				console.log(t[0].trim())
+				for (let l of res_arr) {
+					if (l.includes(t[0].trim())) {
+						temp_arr.push(l)
+					}
+				}
+				$(messageHtml).find("#BU-drop").html('<li class="dropdown-item">Select your Business Unit </li>')
+
+				console.log(temp_arr);
+				for (let w of temp_arr) {
+					$(messageHtml).find('#BU-drop').append(`<li value=${w[3]} class="dropdown-item">${w[2]}</li>`);
+				}
+
+			}
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv3 ').off('click', '.dropbtn-down-prod-Region').on('click', '.dropbtn-down-prod-Region', function (e) {
+			$(e.currentTarget).closest('.parentListDiv3').find('.dropdown-content-Region').toggle("show")
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv5 ').off('click', '.dropbtn-down-prod-Commodity').on('click', '.dropbtn-down-prod-Commodity', function (e) {
+			$(e.currentTarget).closest('.parentListDiv5').find('.dropdown-content-Commodity').toggle("show")
+			if ($(messageHtml).find(".dropbtn-down-prod-Category").text().includes("Select Category")) {
+				$(messageHtml).find('#category-drop').html('<li class="dropdown-item">Please select Category</li>');
+			}
+			if (!$(messageHtml).find(".dropbtn-down-prod-Category ").text().includes("Select Division")) {
+				let temp_arr = []
+				let t = $(messageHtml).find(".dropbtn-down-prod-Category ").text().split(">")
+				console.log(t[0].trim())
+				for (let l of res_arr_commodity) {
+					if (l.includes(t[0].trim())) {
+						temp_arr.push(l)
+					}
+				}
+				$(messageHtml).find("#category-drop").html('<li class="dropdown-item">Select your Commodity</li>')
+
+				console.log(temp_arr);
+				for (let w of temp_arr) {
+					$(messageHtml).find('#category-drop').append(`<li value=${w[3]} class="dropdown-item">${w[2]}</li>`);
+				}
+
+			}
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv4 ').off('click', '.dropbtn-down-prod-Category').on('click', '.dropbtn-down-prod-Category', function (e) {
+			$(e.currentTarget).closest('.parentListDiv4').find('.dropdown-content-Category').toggle("show")
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv1 .multi').off('click', '.dropdown-item').on('click', '.dropdown-item', function (e) {
+			$(".dropbtn-down-prod-Div").html($(e.currentTarget).html())
+			$(messageHtml).find(".dropbtn-down-prod-BU").html('Select Business Unit <span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span>')
+			$(e.currentTarget).closest('.parentListDiv1').find('.dropdown-content-DIV').toggle("show")
+			if (counter === 0) {
+				for (let text of document.querySelectorAll(".dropdown-content-BU> .multi > li")) {
+					//console.log(text.textContent)
+					let x = text.textContent.split("/")
+					res_arr.push(x);
+				}
+				res_arr = res_arr.slice(0, 343);
+
+			}
+
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv2 .multi').off('click', '.dropdown-item').on('click', '.dropdown-item', function (e) {
+			$(".dropbtn-down-prod-BU").html($(e.currentTarget).html())
+			$(e.currentTarget).closest('.parentListDiv1').find('.dropdown-content-BU').toggle("show")
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv3 .multi').off('click', '.dropdown-item').on('click', '.dropdown-item', function (e) {
+			$(".dropbtn-down-prod-Region").html($(e.currentTarget).html())
+			$(e.currentTarget).closest('.parentListDiv1').find('.dropdown-content-Region').toggle("show")
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv4 .multi').off('click', '.dropdown-item').on('click', '.dropdown-item', function (e) {
+			$(".dropbtn-down-prod-Category").html($(e.currentTarget).html())
+			$(".dropbtn-down-prod-Commodity").html('Select Commodity <span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span>')
+			$(e.currentTarget).closest('.parentListDiv4').find('.dropdown-content-Category').toggle("show")
+			if (counter === 0) {
+				for (let text of document.querySelectorAll(".dropdown-content-Commodity> .multi > li")) {
+					//console.log(text.textContent)
+					let x = text.textContent.split("/")
+					res_arr_commodity.push(x);
+				}
+				res_arr_commodity = res_arr_commodity.slice(0, 44);
+			}
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv5 .multi').off('click', '.dropdown-item').on('click', '.dropdown-item', function (e) {
+			$(".dropbtn-down-prod-Commodity").html($(e.currentTarget).html())
+			$(e.currentTarget).closest('.parentListDiv5').find('.dropdown-content-Commodity').toggle("show")
+		});
+		$(messageHtml).find("#show-info").hover(function () {
+			$(messageHtml).find("#multiple-esn-info").toggle("hide")
+		})
+		$(messageHtml).find('.formMainComponent .align-btn-block').off('click', '.submit-button-primary-btn').on('click', '.submit-button-primary-btn', function (e) {
+			console.log("clicked submit button")
+			if ($("#supplierIFA").val() === "") {
+				$(messageHtml).find("#supplierEmpty").removeClass("hide")
+				$(messageHtml).find("#supplierEmpty").addClass("show")
+
+			}
+			if ($("#ESN").val() === "") {
+				$(messageHtml).find("#esnEmpty").addClass("show")
+			}
+
+			if ($(messageHtml).find("#supplierIFA").val() != "" || $(messageHtml).find("#ESN").val() != "") {
+
+				var parentElement = $(e.currentTarget).closest(".fromOtherUsers.with-icon");
+				var messageData = $(parentElement).data();
+				if (messageData.tmplItem.data.msgData.message[0].component.payload) {
+					messageData.tmplItem.data.msgData.message[0].component.payload.ignoreCheckMark = true;
+					var msgData = messageData.tmplItem.data.msgData;
+				}
+				var suppIFA = $(messageHtml).find("#supplierIFA").val();
+				var Esn = $(messageHtml).find("#ESN").val()
+				console.log($(messageHtml).find(".dropbtn-down-prod-Div").text())
+				var division = $(messageHtml).find(".dropbtn-down-prod-Div").text().split(">")
+				var BusinessUnit = $(messageHtml).find(".dropbtn-down-prod-BU").text().split(">")
+				var region = $(messageHtml).find(".dropbtn-down-prod-Region").text().split(">")
+				var category = $(messageHtml).find(".dropbtn-down-prod-Category").text().split(">")
+				var commodity = $(messageHtml).find(".dropbtn-down-prod-Commodity").text().split(">")
+				var final_res = suppIFA + " /" + Esn + " /" + division[0].trim().toUpperCase() + " /" + BusinessUnit[0].trim().toUpperCase() + " /" + region[0].trim().toUpperCase() + "  /" + category[0].trim().toUpperCase() + " /" + commodity[0].trim().toUpperCase();
+				$('.chatInputBox').text(final_res);
+				var selectedValue = "..."
+				chatInitialize.sendMessage($('.chatInputBox'), selectedValue, msgData);
+				$(messageHtml).find(".buttonTmplContent").addClass("hide");
+			}
+		});
+
+		$(messageHtml).find('#supplierIFA').on("input", function (e) {
+			//console.log($(this).val());
+			if (isNaN(parseInt($(this).val()))) {
+				//console.log("wrong")
+				$(messageHtml).find("#supplierError").removeClass("hide")
+				$(messageHtml).find("#supplierError").addClass("show")
+			}
+			else {
+				//console.log("correct")
+				$(messageHtml).find("#supplierError").removeClass("show")
+				$(messageHtml).find("#supplierError").addClass("hide")
+			}
+		})
+		$(messageHtml).find('#ESN').on("input", function (e) {
+			let regx = /^[a-zA-Z0-9]*$/
+			let num_regx = /\d/
+			if (num_regx.test($(this).val())) {
+				$(messageHtml).find("#esnError").removeClass("hide")
+				$(messageHtml).find("#esnError").addClass("show")
+			}
+			else {
+				$(messageHtml).find("#esnError").removeClass("show")
+				$(messageHtml).find("#esnError").addClass("hide")
+				if ($(this).val().length % 4 == 0) {
+					let len = $(this).val().length
+					for (let i = 0; i < len; i += 4) {
+						if ($(this).val()[i + 3] !== "," || $(this).val()[i + 3] !== ";") {
+							$(messageHtml).find("#multiple-esn").removeClass("hide")
+							$(messageHtml).find("#multiple-esn").addClass("show")
+						}
+						else if ($(this).val()[i + 3] === "," || $(this).val()[i + 3] === ";") {
+							$(messageHtml).find("#multiple-esn").removeClass("show")
+							$(messageHtml).find("#multiple-esn").addClass("hide")
+						}
+					}
+				}
+			}
+		})
+	}
+// Custom form changes end here
 
 	customTemplate.prototype.getColumnWidth = function (width) {
 		var _self = this;
