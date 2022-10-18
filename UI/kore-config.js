@@ -11,7 +11,7 @@
     botOptions.koreAnonymousFn = koreAnonymousFn;
     botOptions.recorderWorkerPath = '../libs/recorderWorker.js';
 
-    botOptions.JWTUrl = "https://demo.kore.net/users/sts";
+    botOptions.JWTUrl = "https://mk2r2rmj21.execute-api.us-east-1.amazonaws.com/dev/users/sts";
     botOptions.userIdentity = 'karanraj.sankeshwari@kore.com';// Provide users email id here
     botOptions.botInfo = { name: "ProcureAssist", "_id": "st-28422adc-2158-5430-84cb-bfdab686f6b1" }; // bot name is case sensitive
 

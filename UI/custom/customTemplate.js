@@ -10,6 +10,7 @@
 	let res_arr = [];
 	let res_arr_commodity = []
 	let counter = 0;
+	let list_of_esn = []
 // Custom form variables end here
 	/**
 	 * purpose: Function to render bot message for a given custom template
@@ -287,30 +288,32 @@ var customFromTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tmpl
 	<div class="buttonTmplContent"> \
 	{{if msgData.createdOn}}<div class="extra-info">${helpers.formatDate(msgData.createdOn)}</div>{{/if}} \
 		{{if msgData.icon}}<div class="profile-photo"> <div class="user-account avtar" style="background-image:url(${msgData.icon})"></div> </div> {{/if}} \
-	   <div class="dummy-test" onload="test(msgData.message[0].component.payload)"> \
+	   <div class="dummy-test"onload="test(msgData.message[0].component.payload)"> \
 			<p class="submit-message hide"></p>\
 			<div class="formMainComponent" >\
 			  {{if msgData.message[0].component.payload.heading}}<div class="formHeading">${msgData.message[0].component.payload.heading}</div>{{else}}Submit Form{{/if}}\
 			  <div class="extraPadding"> \
-				<div class="label-text">Enter Supplier IFA</div> \
-				<input class="input-box-textArea inputArea" autocomplete="off" value="${msgData.message[0].component.payload.suppVal}" placeholder="Provide Supplier IFA" minlength="10" maxlength="10" id="supplierIFA"></input> \
+				<div class="label-text">${msgData.message[0].component.payload.SupplierIFA_label_text}</div> \
+				<input class="input-box-textArea inputArea" autocomplete="off" value="${msgData.message[0].component.payload.suppVal}" placeholder="${msgData.message[0].component.payload.SupplierIFA_placeholder_text}" minlength="10" maxlength="10" id="supplierIFA" autofocus></input> \
 				<div class="error-msg hide" id="supplierError">Please enter a valid 10 digit supplier IFA</div> \
 				<div class="error-msg hide" id="supplierEmpty">This field is required</div>\
 			</div> \
 				<div class="parentListDiv1"> \
-				<div class="label-text">Please select your Division </div>\
-						<button class="dropbtn-down-prod-Div" onclick="test()"><span>${msgData.message[0].component.payload.divVal.toUpperCase()}</span> <span class="dropdown-icon"> > </span></button>\
+				<div class="label-text">${msgData.message[0].component.payload.Division_label_text}</div>\
+						<button class="dropbtn-down-prod-Div"><span>${msgData.message[0].component.payload.divVal}</span> <span class="dropdown-icon"> > </span></button>\
 					<div id="productDropdown1" class="dropdown-content-DIV">\
-						<ul class="multi" > \
+						<input type="search" placeholder="search division" id="div-search"></input>\
+						<ul class="multi" id="div-drop"> \
 						{{each(key, msgItem) msgData.message[0].component.payload.divisions}} \
-								<li value="${msgItem}" class="dropdown-item">${msgItem}</li>\
+								<li value="${msgItem}" class="dropdown-item" id="division-drop">${msgItem}</li>\
 						{{/each}} \
 						</ul> \
 				</div> \
 				<div class="parentListDiv2"> \
-				<div class="label-text">Please select your Business Unit</div>\
-						<button class="dropbtn-down-prod-BU" >${msgData.message[0].component.payload.buVal.toUpperCase()}<span class="dropdown-icon" id="dropdown-icon-BU"> > </span></button>\
+				<div class="label-text">${msgData.message[0].component.payload.Business_Unit_label_text}</div>\
+						<button class="dropbtn-down-prod-BU" >${msgData.message[0].component.payload.buVal}<span class="dropdown-icon" id="dropdown-icon-BU"> > </span></button>\
 					<div id="productDropdown2" class="dropdown-content-BU" >\
+					<input type="search" placeholder="search business unit" id="bu-search"></input>\
 						<ul class="multi" id="BU-drop"> \
 						{{each(key, msgItem) msgData.message[0].component.payload.div_data}} \
 								<li value="${msgItem[0]}" class="dropdown-item">${msgItem[0]+"/"+msgItem[1]+"/"+msgItem[2]+"/"+msgItem[3]}</li>\
@@ -318,47 +321,59 @@ var customFromTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tmpl
 						</ul> \
 				</div> \
 				<div class="parentListDiv3"> \
-				<div class="label-text">Please select your region</div>\
-						<button class="dropbtn-down-prod-Region">${msgData.message[0].component.payload.regionVal.toUpperCase()}<span class="dropdown-icon" id="dropdown-icon-Region"> > </span></button>\
+				<div class="label-text">${msgData.message[0].component.payload.Region_label_text}</div>\
+						<button class="dropbtn-down-prod-Region">${msgData.message[0].component.payload.regionVal}<span class="dropdown-icon" id="dropdown-icon-Region"> > </span></button>\
 					<div id="productDropdown3" class="dropdown-content-Region">\
-						<ul class="multi" > \
+					<input type="search" placeholder="search region" id="region-search"></input>\
+						<ul class="multi" id="reg-drop"> \
 						{{each(key, msgItem) msgData.message[0].component.payload.Region}} \
-								<li value="${msgItem[1]}" class="dropdown-item">${msgItem[0]}</li>\
+								<li value="${msgItem[1]}" class="dropdown-item" id="region-drop">${msgItem[0]}</li>\
 						{{/each}} \
 						</ul> \
 				</div> \
 				<div class="parentListDiv4"> \
-				<div class="label-text">Please select a Category</div>\
-						<button class="dropbtn-down-prod-Category">${msgData.message[0].component.payload.categoryVal.toUpperCase()}<span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span></button>\
+				<div class="label-text">${msgData.message[0].component.payload.Category_label_text}</div>\
+						<button class="dropbtn-down-prod-Category">${msgData.message[0].component.payload.categoryVal}<span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span></button>\
 					<div id="productDropdown4" class="dropdown-content-Category">\
-						<ul class="multi" > \
+					<input type="search" placeholder="search category" id="category-search"></input>\
+						<ul class="multi" id="cat-drop"> \
 						{{each(key, msgItem) msgData.message[0].component.payload.category}} \
-								<li value="${msgItem}" class="dropdown-item">${msgItem}</li>\
+								<li value="${msgItem}" class="dropdown-item" id="category-drop">${msgItem}</li>\
 						{{/each}} \
 						</ul> \
 				</div> \
 				<div class="parentListDiv5"> \
-				<div class="label-text">Please select a Commodity</div>\
-						<button class="dropbtn-down-prod-Commodity">${msgData.message[0].component.payload.commodityVal.toUpperCase()}<span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span></button>\
+				<div class="label-text">${msgData.message[0].component.payload.Commodity_label_text} <span id="info-icon-commodity"><img src="../../icons8-info.svg" alt="info-icon" class="img-info-icon"></img></span><div class="info-msg-commodity hide" id="fiscal-year">${msgData.message[0].component.payload.Commodity_helper_text}</div></div>\
+						<button class="dropbtn-down-prod-Commodity">${msgData.message[0].component.payload.commodityVal}<span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span></button>\
 					<div id="productDropdown5" class="dropdown-content-Commodity">\
-						<ul class="multi" id="category-drop"> \
+					<input type="search" placeholder="search commodity" id="commodity-search"></input>\
+						<ul class="multi" id="com-drop"> \
 						{{each(key, msgItem) msgData.message[0].component.payload.commodity_data}} \
-								<li value="${msgItem}" class="dropdown-item">${msgItem[0]+"/"+msgItem[1]+"/"+msgItem[2]+"/"+msgItem[3]}</li>\
+								<li value="${msgItem}" class="dropdown-item" id="commodity-drop">${msgItem[0]+"/"+msgItem[1]+"/"+msgItem[2]+"/"+msgItem[3]}</li>\
 						{{/each}} \
 						</ul> \
 				</div> \
-				<div class="extraPadding"> \
-				<div class="label-text">Enter ESN </div> \
-				<input class="input-box-textArea inputArea" autocomplete="off" value="${msgData.message[0].component.payload.esnVal}" placeholder="Provide ESN" minlength="3" id="ESN"></input> \
-				<div class="error-msg hide" id="esnError">Enter valid ESN</div> \
-				<div class="error-msg hide" id="esnEmpty">Please enter a valid 3 character ESN</div>\
-				<div class="error-msg hide" id="multiple-esn">To enter multiple ESNs please seperate them by commas(,) or semi-colon(;)</div>\
+				<div > \
+				<div class="parentListDiv6"> \
+					<div class="label-text">ESN </div>\
+					<div class="dropbtn-down-prod-ESN">{{if msgData.message[0].component.payload.esnVal.length === 0}}<span>Please select ESN</span><span class="dropdown-icon-esn" id="dropdown-icon-esn"> > </span> {{else}} {{each(key, msgItem) msgData.message[0].component.payload.esnVal}}<div class="selected-text" id ="${msgItem}"><p>${msgItem}</p> <button class="selection-btn-cancel">x</button></div> {{/each}} {{/if}}</div>\
+					<div id="productDropdown6" class="dropdown-content-ESN">\
+					<input type="search" placeholder="search esn" id="esn-search"></input>\
+					<ul class="multi" id="esn-drop"> \
+					<input type="search" placeholder="search esn" id="esn-search"></input>\
+					<li value="" class="dropdown-item">default selection</li>\
+					{{each(key, msgItem) msgData.message[0].component.payload.esn}} \
+								<li value="${msgItem[0]}" class="dropdown-item esn-li" id="esn-drop">${msgItem[0]}</li>\
+						{{/each}} \
+					</ul> \
 				</div> \
-				<div class="extraPadding"> \
-				<div class="label-text">Fiscal Year</div> \
+					</div>\
+				<div > \
+				<div class="label-text">${msgData.message[0].component.payload.Fiscal_year_label_text}<span id="info-icon-fiscal"><img src="../../icons8-info.svg" alt="info-icon" class="img-info-icon"></img></span></div> <div class="info-msg-fiscal hide" id="fiscal-year">${msgData.message[0].component.payload.Fiscal_year_helper_text}</div></div> \
 				<input class="input-box-textArea inputArea" autocomplete="off" value="2022" minlength="0" maxlength="5120" disabled></input> \
 				<div class="error-msg no-show">This field is required</div> \
 			</div> \
+	</div> \
 			<div class="align-btn-block extraPaddingSubmit"><button class="submit-button-primary-btn" >Submit</button></div>\
 			</div>\
 	   </div>\
@@ -2737,15 +2752,35 @@ var advancedListTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tm
 	customTemplate.prototype.customFormTemplateEvents = function (messageHtml) {
 		chatInitialize = this.chatInitialize;
 		$(messageHtml).find('.formMainComponent .parentListDiv1 ').off('click', '.dropbtn-down-prod-Div').on('click', '.dropbtn-down-prod-Div', function (e) {
+			let elements = document.querySelectorAll("#division-drop")
+			let el_data = []
+			for (el of elements){
+				el_data.push(el.innerHTML)
+			}
+			console.log([... new Set(el_data)])
+			el_data = [... new Set(el_data)]
+			$(messageHtml).find("#div-drop").html('<li class="dropdown-item default-selection">Select your Division </li>')
+			for (let w=0;w<el_data.length;w++) {
+				$(messageHtml).find('#div-drop').append(`<li value=${el_data[w]} class="dropdown-item">${el_data[w]}</li>`);
+			}
+			
 			$(e.currentTarget).closest('.parentListDiv1').find('.dropdown-content-DIV').toggle("show")
+			// if(){
+			// 	$(messageHtml).find('#productDropdown2').toggle("show")
+			// }
+			$(messageHtml).find('#productDropdown2').css("display","none")
+			$(messageHtml).find('#productDropdown3').css("display","none")
+			$(messageHtml).find('#productDropdown4').css("display","none")
+			$(messageHtml).find('#productDropdown5').css("display","none")
+			e.stopPropagation()
 
 		});
 		$(messageHtml).find('.formMainComponent .parentListDiv2 ').off('click', '.dropbtn-down-prod-BU').on('click', '.dropbtn-down-prod-BU', function (e) {
 			$(e.currentTarget).closest('.parentListDiv2').find('.dropdown-content-BU').toggle("show")
 			if ($(messageHtml).find(".dropbtn-down-prod-Div ").text().includes("Select Division")) {
-				$(messageHtml).find('#BU-drop').html('<li class="dropdown-item">Please select Division</li>');
+				$(messageHtml).find('#BU-drop').html('<li class="dropdown-item default-selection">Please select your Division</li>');
 			}
-			if (!$(messageHtml).find(".dropbtn-down-prod-Div ").text().includes("Select Division")) {
+			if (!$(messageHtml).find(".dropbtn-down-prod-Div ").text().includes("Please select your Division<")) {
 				console.log(res_arr)
 				let temp_arr = []
 				let t = $(messageHtml).find(".dropbtn-down-prod-Div ").text().split(">")
@@ -2755,24 +2790,69 @@ var advancedListTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tm
 						temp_arr.push(l)
 					}
 				}
-				$(messageHtml).find("#BU-drop").html('<li class="dropdown-item">Select your Business Unit </li>')
+				$(messageHtml).find("#BU-drop").html('<li class="dropdown-item default-selection">Please select your Business Unit </li>')
 
 				console.log(temp_arr);
 				for (let w of temp_arr) {
 					$(messageHtml).find('#BU-drop').append(`<li value=${w[3]} class="dropdown-item">${w[2]}</li>`);
 				}
-
+				$(messageHtml).find('#productDropdown1').css("display","none")
+			$(messageHtml).find('#productDropdown3').css("display","none")
+			$(messageHtml).find('#productDropdown4').css("display","none")
+			$(messageHtml).find('#productDropdown5').css("display","none")
+			e.stopPropagation()
 			}
 		});
 		$(messageHtml).find('.formMainComponent .parentListDiv3 ').off('click', '.dropbtn-down-prod-Region').on('click', '.dropbtn-down-prod-Region', function (e) {
+			let elements = document.querySelectorAll("#region-drop")
+			let el_data = []
+			for (el of elements){
+				el_data.push(el.innerHTML)
+			}
+			console.log([... new Set(el_data)])
+			el_data = [... new Set(el_data)]
+			$(messageHtml).find("#reg-drop").html('<li class="dropdown-item default-selection">Please select your Region </li>')
+			for (let w=0;w<el_data.length;w++) {
+				$(messageHtml).find('#reg-drop').append(`<li value=${el_data[w]} class="dropdown-item">${el_data[w]}</li>`);
+			}
 			$(e.currentTarget).closest('.parentListDiv3').find('.dropdown-content-Region').toggle("show")
+			$(messageHtml).find('#productDropdown2').css("display","none")
+			$(messageHtml).find('#productDropdown1').css("display","none")
+			$(messageHtml).find('#productDropdown4').css("display","none")
+			$(messageHtml).find('#productDropdown5').css("display","none")
+			e.stopPropagation()
+		});
+		$(messageHtml).find('.formMainComponent .parentListDiv6 ').off('click', '.dropbtn-down-prod-ESN').on('click', '.dropbtn-down-prod-ESN', function (e) {
+			if($(messageHtml).find(".dropbtn-down-prod-ESN").html().includes("Please select ESN")){
+				let esn_li = document.querySelectorAll(".esn-li")
+				for(el of esn_li){
+					list_of_esn.push(el.outerText)
+				}
+				
+				 $(messageHtml).find(".dropbtn-down-prod-ESN").html("")
+			}
+			console.log("clicked")
+			$(messageHtml).find("#esn-drop").html("")
+			for(let esn of list_of_esn){
+				$(messageHtml).find('#esn-drop').append(`<li value="" class="dropdown-item">${esn}</li>`)
+			}
+			$(messageHtml).find('#productDropdown6').toggle("show")
+			// $(".dropbtn-down-prod-ESN").html("")
+			$(messageHtml).find('#productDropdown2').css("display","none")
+			$(messageHtml).find('#productDropdown1').css("display","none")
+			$(messageHtml).find('#productDropdown4').css("display","none")
+			$(messageHtml).find('#productDropdown5').css("display","none")
+			e.stopPropagation()
+		});
+		$(messageHtml).on("click", function(e){
+			// $(messageHtml).find("#productDropdown6").css("display","none")
 		});
 		$(messageHtml).find('.formMainComponent .parentListDiv5 ').off('click', '.dropbtn-down-prod-Commodity').on('click', '.dropbtn-down-prod-Commodity', function (e) {
-			$(e.currentTarget).closest('.parentListDiv5').find('.dropdown-content-Commodity').toggle("show")
-			if ($(messageHtml).find(".dropbtn-down-prod-Category").text().includes("Select Category")) {
-				$(messageHtml).find('#category-drop').html('<li class="dropdown-item">Please select Category</li>');
+			if ($(messageHtml).find(".dropbtn-down-prod-Category").text().includes("select")) {
+				$(messageHtml).find('#com-drop').html('<li class="dropdown-item default-selection">Please select your Category</li>');
+				
 			}
-			if (!$(messageHtml).find(".dropbtn-down-prod-Category ").text().includes("Select Division")) {
+			if (!$(messageHtml).find(".dropbtn-down-prod-Category ").text().includes("select")) {
 				let temp_arr = []
 				let t = $(messageHtml).find(".dropbtn-down-prod-Category ").text().split(">")
 				console.log(t[0].trim())
@@ -2781,21 +2861,44 @@ var advancedListTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tm
 						temp_arr.push(l)
 					}
 				}
-				$(messageHtml).find("#category-drop").html('<li class="dropdown-item">Select your Commodity</li>')
+				$(messageHtml).find("#com-drop").html('<li class="dropdown-item default-selection">Please select your Commodity</li>')
 
 				console.log(temp_arr);
 				for (let w of temp_arr) {
-					$(messageHtml).find('#category-drop').append(`<li value=${w[3]} class="dropdown-item">${w[2]}</li>`);
+					$(messageHtml).find('#com-drop').append(`<li value=${w[3]} class="dropdown-item">${w[2]}</li>`);
 				}
-
+				
 			}
+			$(e.currentTarget).closest('.parentListDiv5').find('.dropdown-content-Commodity').toggle("show")
+			$(messageHtml).find('#productDropdown2').css("display","none")
+			$(messageHtml).find('#productDropdown3').css("display","none")
+			$(messageHtml).find('#productDropdown1').css("display","none")
+			$(messageHtml).find('#productDropdown4').css("display","none")
+			e.stopPropagation()
 		});
 		$(messageHtml).find('.formMainComponent .parentListDiv4 ').off('click', '.dropbtn-down-prod-Category').on('click', '.dropbtn-down-prod-Category', function (e) {
+			let elements = document.querySelectorAll("#category-drop")
+			let el_data = []
+			for (el of elements){
+				el_data.push(el.innerHTML)
+			}
+			console.log([... new Set(el_data)])
+			el_data = [... new Set(el_data)]
+			$(messageHtml).find("#cat-drop").html('<li class="dropdown-item default-selection">Please select your Category </li>')
+			for (let w=0;w<el_data.length;w++) {
+				$(messageHtml).find('#cat-drop').append(`<li value=${el_data[w]} class="dropdown-item">${el_data[w]}</li>`);
+			}
 			$(e.currentTarget).closest('.parentListDiv4').find('.dropdown-content-Category').toggle("show")
+			$(messageHtml).find('#productDropdown2').css("display","none")
+			$(messageHtml).find('#productDropdown3').css("display","none")
+			$(messageHtml).find('#productDropdown1').css("display","none")
+			$(messageHtml).find('#productDropdown5').css("display","none")
+			e.stopPropagation()
 		});
+
 		$(messageHtml).find('.formMainComponent .parentListDiv1 .multi').off('click', '.dropdown-item').on('click', '.dropdown-item', function (e) {
 			$(".dropbtn-down-prod-Div").html($(e.currentTarget).html())
-			$(messageHtml).find(".dropbtn-down-prod-BU").html('Select Business Unit <span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span>')
+			$(messageHtml).find(".dropbtn-down-prod-BU").html('Please select Business Unit <span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span>')
 			$(e.currentTarget).closest('.parentListDiv1').find('.dropdown-content-DIV').toggle("show")
 			if (counter === 0) {
 				for (let text of document.querySelectorAll(".dropdown-content-BU> .multi > li")) {
@@ -2818,7 +2921,7 @@ var advancedListTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tm
 		});
 		$(messageHtml).find('.formMainComponent .parentListDiv4 .multi').off('click', '.dropdown-item').on('click', '.dropdown-item', function (e) {
 			$(".dropbtn-down-prod-Category").html($(e.currentTarget).html())
-			$(".dropbtn-down-prod-Commodity").html('Select Commodity <span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span>')
+			$(".dropbtn-down-prod-Commodity").html('Please select your Commodity <span class="dropdown-icon" id="dropdown-icon-Commodity"> > </span>')
 			$(e.currentTarget).closest('.parentListDiv4').find('.dropdown-content-Category').toggle("show")
 			if (counter === 0) {
 				for (let text of document.querySelectorAll(".dropdown-content-Commodity> .multi > li")) {
@@ -2831,10 +2934,38 @@ var advancedListTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tm
 		});
 		$(messageHtml).find('.formMainComponent .parentListDiv5 .multi').off('click', '.dropdown-item').on('click', '.dropdown-item', function (e) {
 			$(".dropbtn-down-prod-Commodity").html($(e.currentTarget).html())
+
 			$(e.currentTarget).closest('.parentListDiv5').find('.dropdown-content-Commodity').toggle("show")
 		});
-		$(messageHtml).find("#show-info").hover(function () {
-			$(messageHtml).find("#multiple-esn-info").toggle("hide")
+		$(messageHtml).find('.formMainComponent .parentListDiv6 .multi').off('click', '.dropdown-item').on('click', '.dropdown-item', function (e) {
+			let existing_value = $(".dropbtn-down-prod-ESN").html().split(">")	
+			$(".dropbtn-down-prod-ESN").append( `<div class="selected-text" id = ${$(e.currentTarget).html()}><p>${$(e.currentTarget).html()}</p> <button class="selection-btn-cancel">x</button></div>`)
+			let index = list_of_esn.indexOf(e.currentTarget.textContent)
+			list_of_esn.splice(index,1)
+			$(messageHtml).find("#esn-drop").html("")
+			for(let esn of list_of_esn){
+				$(messageHtml).find('#esn-drop').append(`<li value="" class="dropdown-item">${esn}</li>`)
+			}
+			if(document.querySelector('.dropbtn-down-prod-ESN').childNodes > 8){
+				$(messageHtml).find(".dropbtn-down-prod-ESN").css("height", "auto")
+			}
+			e.stopPropagation()
+			// $(e.currentTarget).closest('.parentListDiv6').find('.dropdown-content-ESN').toggle("show")
+		});
+		// $(messageHtml).find("#show-info").hover(function () {
+		// 	$(messageHtml).find("#multiple-esn-info").toggle("hide")
+		// })
+		$(messageHtml).find('.formMainComponent .parentListDiv6 .dropbtn-down-prod-ESN').off('click', '.selection-btn-cancel').on('click', '.selection-btn-cancel', function (e){
+			var parent = e.currentTarget.parentNode.id
+			console.log($(messageHtml).find(`#${parent}`))
+			$(messageHtml).find(`#${parent}`).remove()
+			list_of_esn.push(parent);
+			list_of_esn.sort();
+			$(messageHtml).find("#esn-drop").html("")
+			for(let esn of list_of_esn){
+				$(messageHtml).find('#esn-drop').append(`<li value="" class="dropdown-item">${esn}</li>`)
+			}
+			e.stopPropagation()
 		})
 		$(messageHtml).find('.formMainComponent .align-btn-block').off('click', '.submit-button-primary-btn').on('click', '.submit-button-primary-btn', function (e) {
 			console.log("clicked submit button")
@@ -2846,8 +2977,12 @@ var advancedListTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tm
 			if ($("#ESN").val() === "") {
 				$(messageHtml).find("#esnEmpty").addClass("show")
 			}
-
-			if ($(messageHtml).find("#supplierIFA").val() != "" || $(messageHtml).find("#ESN").val() != "") {
+			var ESNs = $(messageHtml).find(".dropbtn-down-prod-ESN").text().split("x")
+			for (let esn of ESNs){
+				console.log(esn.trim())
+			}
+			ESNs.pop()
+			if ($(messageHtml).find("#supplierIFA").val() != "" || ESNs.length != 0) {
 
 				var parentElement = $(e.currentTarget).closest(".fromOtherUsers.with-icon");
 				var messageData = $(parentElement).data();
@@ -2856,21 +2991,91 @@ var advancedListTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tm
 					var msgData = messageData.tmplItem.data.msgData;
 				}
 				var suppIFA = $(messageHtml).find("#supplierIFA").val();
-				var Esn = $(messageHtml).find("#ESN").val()
-				console.log($(messageHtml).find(".dropbtn-down-prod-Div").text())
+				var Esn = ""
+				for (let esn of ESNs){
+					Esn = Esn + "^" + esn.trim()
+				}
+				Esn = Esn + "^" + "123"
+				Esn = Esn.slice(1)
+				console.log(Esn)
 				var division = $(messageHtml).find(".dropbtn-down-prod-Div").text().split(">")
 				var BusinessUnit = $(messageHtml).find(".dropbtn-down-prod-BU").text().split(">")
 				var region = $(messageHtml).find(".dropbtn-down-prod-Region").text().split(">")
 				var category = $(messageHtml).find(".dropbtn-down-prod-Category").text().split(">")
 				var commodity = $(messageHtml).find(".dropbtn-down-prod-Commodity").text().split(">")
 				var final_res = suppIFA + " /" + Esn + " /" + division[0].trim().toUpperCase() + " /" + BusinessUnit[0].trim().toUpperCase() + " /" + region[0].trim().toUpperCase() + "  /" + category[0].trim().toUpperCase() + " /" + commodity[0].trim().toUpperCase();
+				console.log(final_res)
 				$('.chatInputBox').text(final_res);
 				var selectedValue = "..."
 				chatInitialize.sendMessage($('.chatInputBox'), selectedValue, msgData);
 				$(messageHtml).find(".buttonTmplContent").addClass("hide");
 			}
 		});
-
+		$(messageHtml).find('#info-icon').on("mouseenter",function(e){
+			$(messageHtml).find(".info-msg").removeClass("hide")
+			$(messageHtml).find(".info-msg").addClass("show")
+		})
+		$(messageHtml).find('#info-icon').mouseleave(function(e){
+			$(messageHtml).find(".info-msg").removeClass("show")
+			$(messageHtml).find(".info-msg").addClass("hide")
+		})
+		$(messageHtml).find('#info-icon-fiscal').on("mouseenter",function(e){
+			$(messageHtml).find(".info-msg-fiscal").removeClass("hide")
+			$(messageHtml).find(".info-msg-fiscal").addClass("show")
+		})
+		$(messageHtml).find('#info-icon-fiscal').mouseleave(function(e){
+			$(messageHtml).find(".info-msg-fiscal").removeClass("show")
+			$(messageHtml).find(".info-msg-fiscal").addClass("hide")
+		})
+		$(messageHtml).find('#info-icon-commodity').on("mouseenter",function(e){
+			$(messageHtml).find(".info-msg-commodity").removeClass("hide")
+			$(messageHtml).find(".info-msg-commodity").addClass("show")
+		})
+		$(messageHtml).find('#info-icon-commodity').mouseleave(function(e){
+			$(messageHtml).find(".info-msg-commodity").removeClass("show")
+			$(messageHtml).find(".info-msg-commodity").addClass("hide")
+		})
+		$(messageHtml).find('#info-icon-esn').on("mouseenter",function(e){
+			$(messageHtml).find(".info-msg-esn").removeClass("hide")
+			$(messageHtml).find(".info-msg-esn").addClass("show")
+		})
+		$(messageHtml).find('#info-icon-esn').mouseleave(function(e){
+			$(messageHtml).find(".info-msg-esn").removeClass("show")
+			$(messageHtml).find(".info-msg-esn").addClass("hide")
+		})
+		$(messageHtml).find('#supplierIFA').on("focus",function(e){
+			$(messageHtml).find('#productDropdown2').css("display","none")
+			$(messageHtml).find('#productDropdown3').css("display","none")
+			$(messageHtml).find('#productDropdown1').css("display","none")
+			$(messageHtml).find('#productDropdown5').css("display","none")
+			$(messageHtml).find('#productDropdown4').css("display","none")
+			$(messageHtml).find('#productDropdown6').css("display","none")
+		})
+		$(messageHtml).find('#ESN').on("focus",function(e){
+			$(messageHtml).find('#productDropdown2').css("display","none")
+			$(messageHtml).find('#productDropdown3').css("display","none")
+			$(messageHtml).find('#productDropdown1').css("display","none")
+			$(messageHtml).find('#productDropdown5').css("display","none")
+			$(messageHtml).find('#productDropdown4').css("display","none")
+		})
+		$(messageHtml).find('#div-search').on("focus",function(e){
+			e.stopPropagation()
+		})
+		$(messageHtml).find('#bu-search').on("focus",function(e){
+			e.stopPropagation()
+		})
+		$(messageHtml).find('#region-search').on("focus",function(e){
+			e.stopPropagation()
+		})
+		$(messageHtml).find('#category-search').on("focus",function(e){
+			e.stopPropagation()
+		})
+		$(messageHtml).find('#commodity-search').on("focus",function(e){
+			e.stopPropagation()
+		})
+		$(messageHtml).find('#esn-search').on("focus",function(e){
+			e.stopPropagation()
+		})
 		$(messageHtml).find('#supplierIFA').on("input", function (e) {
 			//console.log($(this).val());
 			if (isNaN(parseInt($(this).val()))) {
@@ -2884,31 +3089,153 @@ var advancedListTemplate = '<script id="chat_message_tmpl" type="text/x-jqury-tm
 				$(messageHtml).find("#supplierError").addClass("hide")
 			}
 		})
-		$(messageHtml).find('#ESN').on("input", function (e) {
-			let regx = /^[a-zA-Z0-9]*$/
-			let num_regx = /\d/
-			if (num_regx.test($(this).val())) {
-				$(messageHtml).find("#esnError").removeClass("hide")
-				$(messageHtml).find("#esnError").addClass("show")
-			}
-			else {
-				$(messageHtml).find("#esnError").removeClass("show")
-				$(messageHtml).find("#esnError").addClass("hide")
-				if ($(this).val().length % 4 == 0) {
-					let len = $(this).val().length
-					for (let i = 0; i < len; i += 4) {
-						if ($(this).val()[i + 3] !== "," || $(this).val()[i + 3] !== ";") {
-							$(messageHtml).find("#multiple-esn").removeClass("hide")
-							$(messageHtml).find("#multiple-esn").addClass("show")
-						}
-						else if ($(this).val()[i + 3] === "," || $(this).val()[i + 3] === ";") {
-							$(messageHtml).find("#multiple-esn").removeClass("show")
-							$(messageHtml).find("#multiple-esn").addClass("hide")
-						}
-					}
+		$(messageHtml).find("#esn-search").on("input", function (e){
+			// let elements = document.querySelectorAll("#esn-drop")
+			let el_data = [...list_of_esn]
+			// for (el of elements){
+			// 	el_data.push(el.innerHTML)
+			// }
+			console.log([... new Set(el_data)])
+			el_data = [... new Set(el_data)]
+			$(messageHtml).find("#esn-drop").html('<li class="dropdown-item">Select your Division </li>')
+			for (let w=0;w<el_data.length;w++) {
+				lower_w = el_data[w].toLowerCase()
+				if (lower_w.includes($(this).val().toLowerCase())){
+					$(messageHtml).find('#esn-drop').append(`<li value=${el_data[w]} class="dropdown-item">${el_data[w]}</li>`);
 				}
 			}
+			e.stopPropagation()
+		});
+		$(messageHtml).find("#div-search").on("input", function (e){
+			let elements = document.querySelectorAll("#division-drop")
+			let el_data = []
+			for (el of elements){
+				el_data.push(el.innerHTML)
+			}
+			console.log([... new Set(el_data)])
+			el_data = [... new Set(el_data)]
+			$(messageHtml).find("#div-drop").html('<li class="dropdown-item">Select your Division </li>')
+			for (let w=0;w<el_data.length;w++) {
+				lower_w = el_data[w].toLowerCase()
+				if (lower_w.includes($(this).val().toLowerCase())){
+					$(messageHtml).find('#div-drop').append(`<li value=${el_data[w]} class="dropdown-item">${el_data[w]}</li>`);
+				}
+			}
+			e.stopPropagation()
+		});
+		$(messageHtml).find("#bu-search").on("input", function (e){
+			console.log("inside typing")
+			if ($(messageHtml).find(".dropbtn-down-prod-Div ").text().includes("Select Division")) {
+				$(messageHtml).find('#BU-drop').html('<li class="dropdown-item">Please select Division</li>');
+			}
+			if (!$(messageHtml).find(".dropbtn-down-prod-Div ").text().includes("Select Division")) {
+				console.log(res_arr)
+				let temp_arr = []
+				let t = $(messageHtml).find(".dropbtn-down-prod-Div ").text().split(">")
+				console.log(t[0].trim())
+				for (let l of res_arr) {
+					if (l.includes(t[0].trim())) {
+						temp_arr.push(l)
+					}
+				}
+				console.log(temp_arr)
+				$(messageHtml).find("#BU-drop").html('<li class="dropdown-item">Select your Business Unit </li>')
+				for (let w of temp_arr) {
+					let x = w[2].toLowerCase()
+					if (x.includes($(this).val().toLowerCase())){
+						$(messageHtml).find('#BU-drop').append(`<li value=${w[3]} class="dropdown-item">${w[2]}</li>`);
+					}
+				}
+
+			}
+			e.stopPropagation()
 		})
+		$(messageHtml).find("#region-search").on("input", function (e){
+			let elements = document.querySelectorAll("#region-drop")
+			let el_data = []
+			for (el of elements){
+				el_data.push(el.innerHTML)
+			}
+			console.log([... new Set(el_data)])
+			el_data = [... new Set(el_data)]
+			$(messageHtml).find("#reg-drop").html('<li class="dropdown-item">Select your Region </li>')
+			for (let w=0;w<el_data.length;w++) {
+				lower_w = el_data[w].toLowerCase()
+				if (lower_w.includes($(this).val().toLowerCase())){
+					$(messageHtml).find('#reg-drop').append(`<li value=${el_data[w]} class="dropdown-item">${el_data[w]}</li>`);
+				}
+			}
+			e.stopPropagation()
+		})
+		$(messageHtml).find("#category-search").on("input", function (e){
+			let elements = document.querySelectorAll("#category-drop")
+			let el_data = []
+			for (el of elements){
+				el_data.push(el.innerHTML)
+			}
+			console.log([... new Set(el_data)])
+			el_data = [... new Set(el_data)]
+			$(messageHtml).find("#cat-drop").html('<li class="dropdown-item">Select your Category </li>')
+			for (let w=0;w<el_data.length;w++) {
+				lower_w = el_data[w].toLowerCase()
+				if (lower_w.includes($(this).val().toLowerCase())){
+					$(messageHtml).find('#cat-drop').append(`<li value=${el_data[w]} class="dropdown-item">${el_data[w]}</li>`);
+				}
+			}
+			e.stopPropagation()
+		})
+		$(messageHtml).find("#commodity-search").on("input", function (e){
+			console.log("inside typing")
+			if ($(messageHtml).find(".dropbtn-down-prod-Category").text().includes("Select Category")) {
+				$(messageHtml).find('#com-drop').html('<li class="dropdown-item">Please select Category</li>');
+			}
+			if (!$(messageHtml).find(".dropbtn-down-prod-Category ").text().includes("Select Division")) {
+				let temp_arr = []
+				let t = $(messageHtml).find(".dropbtn-down-prod-Category ").text().split(">")
+				console.log(t[0].trim())
+				for (let l of res_arr_commodity) {
+					if (l.includes(t[0].trim())) {
+						temp_arr.push(l)
+					}
+				}
+				$(messageHtml).find("#com-drop").html('<li class="dropdown-item">Select your Commodity</li>')
+
+				for (let w of temp_arr) {
+					let x = w[2].toLowerCase()
+					if (x.includes($(this).val().toLowerCase())){
+						$(messageHtml).find('#com-drop').append(`<li value=${w[3]} class="dropdown-item">${w[2]}</li>`);
+					}
+				}
+
+			}
+			e.stopPropagation()
+		})
+		// ESN input field version currently not in use
+		// $(messageHtml).find('#ESN').on("input", function (e) {
+		// 	let regx = /^[a-zA-Z0-9]*$/
+		// 	let num_regx = /\d/
+		// 	if (num_regx.test($(this).val())) {
+		// 		$(messageHtml).find("#esnError").removeClass("hide")
+		// 		$(messageHtml).find("#esnError").addClass("show")
+		// 	}
+		// 	else {
+		// 		$(messageHtml).find("#esnError").removeClass("show")
+		// 		$(messageHtml).find("#esnError").addClass("hide")
+		// 		if ($(this).val().length % 4 == 0) {
+		// 			let len = $(this).val().length
+		// 			for (let i = 0; i < len; i += 4) {
+		// 				if ($(this).val()[i + 3] !== "," || $(this).val()[i + 3] !== ";") {
+		// 					$(messageHtml).find("#multiple-esn").removeClass("hide")
+		// 					$(messageHtml).find("#multiple-esn").addClass("show")
+		// 				}
+		// 				else if ($(this).val()[i + 3] === "," || $(this).val()[i + 3] === ";") {
+		// 					$(messageHtml).find("#multiple-esn").removeClass("show")
+		// 					$(messageHtml).find("#multiple-esn").addClass("hide")
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// })
 	}
 // Custom form changes end here
 

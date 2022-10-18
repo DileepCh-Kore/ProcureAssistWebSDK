@@ -1494,6 +1494,7 @@
                 _chatContainer.off('click', '.buttonTmplContentBox li,.listTmplContentChild .buyBtn,.viewMoreList .viewMore,.listItemPath,.quickReply,.carouselImageContent,.listRightContent,.checkboxBtn,.likeDislikeDiv').on('click', '.buttonTmplContentBox li,.listTmplContentChild .buyBtn, .viewMoreList .viewMore,.listItemPath,.quickReply,.carouselImageContent,.listRightContent,.checkboxBtn,.likeDislikeDiv', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    // $(".buttonTmplContentBox").css("display","none")
                     var type = $(this).attr('type');
                     if (type) {
                         type = type.toLowerCase();
@@ -2022,6 +2023,8 @@
                 if (chatInput.text().trim() === "" && $('.attachment').html().trim().length == 0) {
                     return;
                 }
+                $('.kore-chat-body ul li .buttonTmplContentBox ').css('pointer-events', 'none');
+                $('.kore-chat-body ul li .clickableButton ').css('pointer-events', 'none'); 
                 if(msgObject && msgObject.message && msgObject.message.length && msgObject.message[0]&& msgObject.message[0].component&& msgObject.message[0].component.payload && msgObject.message[0].component.payload.ignoreCheckMark){
                     var ignoreCheckMark=msgObject.message[0].component.payload.ignoreCheckMark;
                     }
